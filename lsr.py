@@ -97,9 +97,10 @@ class LSR:
         return correlation_sum / (n - 1)
 
     def _calculate_residuals(self):
-        for x in self.xs:
+        for i in self.data_points:
+            x, y = i[0], i[1]
             pred_y = self.predict(x)
-            self.residuals.append((x, pred_y - x))
+            self.residuals.append((x, pred_y - y))
 
     def fit(self):
         """
