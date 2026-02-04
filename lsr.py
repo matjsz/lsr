@@ -48,18 +48,14 @@ class LSR:
         x_mean_dist_sum = 0
         for x in self.xs:
             x_mean_dist_sum += (x - self.x_mean) ** 2
-        x_variance = x_mean_dist_sum / (
-            x_n - 1
-        )  # Applies Bessel's correction, since this is sample-based
+        x_variance = x_mean_dist_sum / (x_n - 1)  # applies bessel's correction
 
         # y
         y_n = len(self.ys)
         y_mean_dist_sum = 0
         for y in self.ys:
             y_mean_dist_sum += (y - self.y_mean) ** 2
-        y_variance = y_mean_dist_sum / (
-            y_n - 1
-        )  # Applies Bessel's correction, since this is sample-based
+        y_variance = y_mean_dist_sum / (y_n - 1)  # applies bessel's correction
 
         return (x_variance, y_variance)
 
@@ -89,7 +85,6 @@ class LSR:
 
         n = len(self.data_points)
 
-        # Calculate the sum of the z-scores products
         correlation_sum = 0
         for i in self.data_points:
             x, y = i[0], i[1]
@@ -133,9 +128,6 @@ class LSR:
         print(f"Succesfully found correlation coefficient: {self.r}")
 
         self.m = self.r * (self.y_std_deviation / self.x_std_deviation)
-
-        # By simple algebra, (x_mean, y_mean) is a known existing data point on the line
-        # ref_point = (self.x_mean, self.y_mean)
         self.b = self.y_mean - (self.m * self.x_mean)
 
         print(f"Succesfully found m and b - m: {self.m} | b: {self.b}")
@@ -174,38 +166,3 @@ class LSR:
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.show()
-
-
-my_model = LSR([(1, 1), (2, 2), (2, 3), (3, 6)])
-my_model.fit()
-print(my_model.predict(3))
-my_model.plot()
-
-# Dataset to test the model, simulates study hours vs test scores
-my_model_2 = LSR(
-    [
-        (1.5, 45.2),
-        (2.0, 50.5),
-        (2.3, 52.8),
-        (3.0, 58.0),
-        (3.2, 60.1),
-        (3.5, 62.4),
-        (4.0, 68.3),
-        (4.5, 71.0),
-        (5.0, 75.2),
-        (5.2, 74.8),
-        (5.5, 80.1),
-        (6.0, 82.5),
-        (6.1, 84.0),
-        (6.5, 86.2),
-        (7.0, 89.5),
-        (7.5, 92.1),
-        (8.0, 94.0),
-        (8.2, 93.5),
-        (9.0, 96.8),
-        (9.5, 98.2),
-    ]
-)
-my_model_2.fit()
-print(my_model_2.predict(3))
-my_model_2.plot()
