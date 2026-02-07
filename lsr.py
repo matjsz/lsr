@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import math
-import numpy as np
 
 
 class BaselineRegression:
@@ -40,7 +39,6 @@ class BaselineRegression:
     def _calculate_squared_error(self):
         s = 0
         for j in self.residuals:
-            print(j[1])
             s += j[1] ** 2
         self.squared_error = s
 
@@ -193,8 +191,6 @@ class LSR:
         self.squared_error = s
 
     def _calculate_r_squared(self):
-        print(self.squared_error)
-        print(self.baseline_model.squared_error)
         self.r_squared = 1 - (self.squared_error / self.baseline_model.squared_error)
 
     def fit_baseline(self):
