@@ -2,15 +2,10 @@ from lsr import LSR
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("data/house_prices_practice.csv").sample(n=50)
+X_treino = [1, 2, 3, 4, 5]
+y_treino = [2, 4, 5, 4, 5]
 
-X = 'LotArea'
-Y = 'SalePrice'
-
-formatted_data = list(zip(df[X].to_list(), df[Y].to_list()))
-
-df.plot.scatter(X, Y)
-plt.show()
+formatted_data = list(zip(X_treino, y_treino))
 
 model = LSR(data_points=formatted_data)
 model.fit()
