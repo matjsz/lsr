@@ -2,11 +2,90 @@ import matplotlib.pyplot as plt
 import math
 
 
+class BaselineRegression:
+    def __init__(self, data_points: list[tuple | list]):
+        self.data_points = data_points
+        self.xs = [j[0] for j in self.data_points]
+        self.ys = [j[1] for j in self.data_points]
+
+        self.m = 0
+        self.b = None
+
+        self.residuals = []
+
+        self.squared_error = None
+
+    def _calculate_mean(self):
+        x_sum = 0
+        x_n = len(self.xs)
+        for k in self.xs:
+            x_sum += k
+        x_mean = x_sum / x_n
+
+        y_sum = 0
+        y_n = len(self.ys)
+        for j in self.ys:
+            y_sum += j
+        y_mean = y_sum / y_n
+
+        return (x_mean, y_mean)
+
+    def _calculate_residuals(self):
+        for i in self.data_points:
+            x, y = i[0], i[1]
+            pred_y = self.predict(x)
+            self.residuals.append((x, pred_y - y))
+
+    def _calculate_squared_error(self):
+        s = 0
+        for j in self.residuals:
+            s += j[1] ** 2
+        self.squared_error = s
+
+    def fit(self):
+        self.b = self._calculate_mean()[1]
+        self._calculate_residuals()
+        self._calculate_squared_error()
+
+        return (self.m, self.b)
+
+    def predict(self, x: float | int):
+        return self.b
+
+    def plot(self):
+        plt.figure(figsize=(10, 6))
+
+        line_xs = [min(self.xs), max(self.xs)]
+        line_ys = [self.predict(x) for x in line_xs]
+
+        plt.plot(
+            line_xs,
+            line_ys,
+            color="orange",
+            label=f"LSR: y={self.m:.2f}x + {self.b:.2f}",
+        )
+
+        plt.scatter(self.xs, self.ys, label="Original Data")
+
+        for x, y in zip(self.xs, self.ys):
+            pred_y = self.predict(x)
+            plt.plot([x, x], [y, pred_y], color="red", linestyle="--", alpha=0.5)
+
+        plt.title("Least Squares Regression")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.show()
+
+
 class LSR:
     def __init__(self, data_points: list[tuple | list]):
         self.data_points = data_points
         self.xs = [j[0] for j in self.data_points]
         self.ys = [j[1] for j in self.data_points]
+
+        self.baseline_model = BaselineRegression(self.data_points)
 
         self.mean = None
         self.x_mean = None
@@ -21,11 +100,14 @@ class LSR:
         self.y_std_deviation = None
 
         self.r = None
+        self.r_squared = None
 
         self.m = None
         self.b = None
 
         self.residuals = []
+
+        self.squared_error = None
 
     def _calculate_mean(self):
         x_sum = 0
@@ -94,7 +176,7 @@ class LSR:
 
             correlation_sum += x_zscore * y_zscore
 
-        return correlation_sum / (n - 1)
+        self.r = correlation_sum / (n - 1)
 
     def _calculate_residuals(self):
         for i in self.data_points:
@@ -102,10 +184,25 @@ class LSR:
             pred_y = self.predict(x)
             self.residuals.append((x, pred_y - y))
 
+    def _calculate_squared_error(self):
+        s = 0
+        for j in self.residuals:
+            s += j[1] ** 2
+        self.squared_error = s
+
+    def _calculate_r_squared(self):
+        self.r_squared = 1 - (self.squared_error / self.baseline_model.squared_error)
+
+    def fit_baseline(self):
+        self.baseline_model.fit()
+        print("Succesfully fitted Baseline Model.")
+
     def fit(self):
         """
         Fits the Least Squares Regression model by calculating the means, variances, standard deviations, the correlation coefficient and finally, the slope (m) and intercept (b). All of this of course, based on the data points given upon the object's instantiation.
         """
+        self.fit_baseline()
+
         self.mean = self._calculate_mean()
         self.x_mean = self.mean[0]
         self.y_mean = self.mean[1]
@@ -125,7 +222,7 @@ class LSR:
             f"Succesfully found standard deviation - x: {self.x_std_deviation} | y: {self.y_std_deviation}"
         )
 
-        self.r = self._calculate_r()
+        self._calculate_r()
         print(f"Succesfully found correlation coefficient: {self.r}")
 
         self.m = self.r * (self.y_std_deviation / self.x_std_deviation)
@@ -134,15 +231,17 @@ class LSR:
         print(f"Succesfully found m and b - m: {self.m} | b: {self.b}")
 
         self._calculate_residuals()
+        self._calculate_squared_error()
+        self._calculate_r_squared()
+
+        print(f"R² = {self.r_squared}")
 
         return (self.m, self.b)
 
     def predict(self, x: float | int):
         return self.m * x + self.b
 
-    def plot(
-        self, with_original_points: bool = True, predict: int | float | None = None
-    ):
+    def plot(self):
         plt.figure(figsize=(10, 6))
 
         line_xs = [min(self.xs), max(self.xs)]
